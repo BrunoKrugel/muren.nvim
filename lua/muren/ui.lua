@@ -162,32 +162,69 @@ local update_preview = function()
   if not preview_open then
     return
   end
-
-  -- Set the correct filetype for the preview buffer
-  local original_filetype = vim.api.nvim_buf_get_option(options.values.buffer, "filetype")
-  vim.api.nvim_buf_set_option(bufs.preview, "filetype", original_filetype)
-
-  -- Retrieve UI lines (patterns and replacements)
+  if options.values.filetype_in_preview and not options.values.cwd then
+    vim.api.nvim_buf_set_option(
+      bufs.preview,
+      "filetype",
+      vim.api.nvim_buf_get_option(options.values.buffer, "filetype")
+    )
+  end
   local ui_lines = get_ui_lines()
-
-  -- Example: Get relevant lines based on patterns
-  local relevant_lines = {}
+  local relevant_line_nums = {}
   for _, pattern in ipairs(ui_lines.patterns) do
-    -- Replace this with your logic to find relevant lines based on patterns
-    -- Example: search.find_all_line_matches(pattern, options.values)
-    -- Then populate relevant_lines with the matched lines
-    table.insert(relevant_lines, "Matched line based on pattern: " .. pattern)
+    for buf, lines in pairs(search.find_all_line_matches(pattern, options.values)) do
+      for _, line in ipairs(lines) do
+        if not relevant_line_nums[buf] then
+          relevant_line_nums[buf] = {}
+        end
+        relevant_line_nums[buf][line - 1] = true
+      end
+    end
   end
 
-  -- Set lines in the preview buffer
+  local relevant_lines = {}
+  local buf_info_per_idx = {}
+  local current_buf = vim.api.nvim_get_current_buf()
+  for buf, line_nums in pairs(relevant_line_nums) do
+    for line_num, _ in pairs(line_nums) do
+      -- NOTE we need to do this to make sure the buffer is loaded since it's not done by :vim
+      vim.api.nvim_set_current_buf(buf)
+      local lines = vim.api.nvim_buf_get_lines(buf, line_num, line_num + 1, false)
+      if #lines > 0 then
+        table.insert(relevant_lines, lines[1])
+        table.insert(buf_info_per_idx, {
+          buf = buf,
+          name = vim.api.nvim_buf_get_name(buf),
+          lnum = line_num,
+        })
+      end
+    end
+  end
+  vim.api.nvim_set_current_buf(current_buf)
+
   vim.api.nvim_buf_set_lines(bufs.preview, 0, -1, true, relevant_lines)
-
-  -- Apply syntax highlighting to the preview buffer
-  vim.api.nvim_command "syntax on"
-  vim.api.nvim_command "doautocmd Syntax"
-
-  -- Move cursor to the top of the preview buffer
-  vim.api.nvim_command "normal! gg"
+  search.do_replace_with_patterns(ui_lines.patterns, ui_lines.replacements, {
+    buffer = bufs.preview,
+    two_step = options.values.two_step,
+    all_on_line = options.values.all_on_line,
+    range = nil,
+  })
+  if options.values.cwd then
+    local prefixed_lines = {}
+    local highlights = {}
+    for i, buf_info in ipairs(buf_info_per_idx) do
+      local format_spec = format_cwd_preview_line(vim.api.nvim_buf_get_lines(bufs.preview, i - 1, i, true)[1], buf_info)
+      table.insert(prefixed_lines, format_spec.text)
+      table.insert(highlights, format_spec.highlights)
+    end
+    vim.api.nvim_buf_set_lines(bufs.preview, 0, -1, true, prefixed_lines)
+    for line, hls in ipairs(highlights) do
+      for _, hl_spec in ipairs(hls) do
+        vim.api.nvim_buf_add_highlight(bufs.preview, -1, hl_spec.hl_group, line - 1, hl_spec.col_start, hl_spec.col_end)
+      end
+    end
+  end
+  buf_normal(bufs.preview, "gg")
 end
 
 local get_nvim_ui_size = function()
@@ -338,7 +375,6 @@ local do_replace = function()
   local lines = get_ui_lines()
   last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
   last_undoed_bufs = nil
-  vim.notify "Replacements done"
 end
 
 local do_undo = function()
@@ -431,10 +467,11 @@ M.open = function(opts)
   end
 
   -- Set transparency
-  -- vim.api.nvim_win_set_option(wins.preview, "winblend", options.values.winblend.preview)
-  -- vim.api.nvim_win_set_option(wins.patterns, "winblend", options.values.winblend.patterns)
-  -- vim.api.nvim_win_set_option(wins.replacements, "winblend", options.values.winblend.replacements)
-  -- vim.api.nvim_win_set_option(wins.options, "winblend", options.values.winblend.options)
+  vim.api.nvim_win_set_option(wins.preview, "winblend", options.values.winblend.preview)
+
+  vim.api.nvim_win_set_option(wins.patterns, "winblend", options.values.winblend.patterns)
+  vim.api.nvim_win_set_option(wins.replacements, "winblend", options.values.winblend.replacements)
+  vim.api.nvim_win_set_option(wins.options, "winblend", options.values.winblend.options)
 
   -- Setting keymaps
   local keys = options.values.keys
