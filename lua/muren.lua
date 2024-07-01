@@ -15,6 +15,7 @@ local muren_commands = {
   MurenOpen = api.open_ui,
   MurenClose = api.close_ui,
   MurenToggle = api.toggle_ui,
+  Muren = api.toggle_ui,
   MurenFresh = api.open_fresh_ui,
   MurenUnique = api.open_unique_ui,
 }
