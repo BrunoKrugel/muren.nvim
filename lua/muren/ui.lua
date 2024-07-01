@@ -375,6 +375,7 @@ local do_replace = function()
   local lines = get_ui_lines()
   last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
   last_undoed_bufs = nil
+  vim.notify "Replacements done"
 end
 
 local do_undo = function()
@@ -467,11 +468,10 @@ M.open = function(opts)
   end
 
   -- Set transparency
-  vim.api.nvim_win_set_option(wins.preview, "winblend", options.values.winblend.preview)
-
-  vim.api.nvim_win_set_option(wins.patterns, "winblend", options.values.winblend.patterns)
-  vim.api.nvim_win_set_option(wins.replacements, "winblend", options.values.winblend.replacements)
-  vim.api.nvim_win_set_option(wins.options, "winblend", options.values.winblend.options)
+  -- vim.api.nvim_win_set_option(wins.preview, "winblend", options.values.winblend.preview)
+  -- vim.api.nvim_win_set_option(wins.patterns, "winblend", options.values.winblend.patterns)
+  -- vim.api.nvim_win_set_option(wins.replacements, "winblend", options.values.winblend.replacements)
+  -- vim.api.nvim_win_set_option(wins.options, "winblend", options.values.winblend.options)
 
   -- Setting keymaps
   local keys = options.values.keys
