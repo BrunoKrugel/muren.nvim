@@ -287,8 +287,8 @@ local open_preview = function()
     row = ui_positions.preview.row,
     col = ui_positions.preview.col,
     style = 'minimal',
-    border = {"┏", "━" ,"┓", "┃", "┛", "━", "└", "┃"},
-    title = {{'preview', 'Comment'}},
+    border = options.values.borders.preview,
+    title = {{options.values.titles.preview, 'Comment'}},
     title_pos = 'center',
     zindex = 10,
   })
@@ -441,25 +441,25 @@ M.open = function(opts)
   local ui_positions = make_ui_positions(options.values)
   wins.patterns = vim.api.nvim_open_win(bufs.patterns, true, {
     relative = 'editor',
-    width = options.values.patterns_width,
+    width = options.values.patterns_width - 1,
     height = options.values.patterns_height,
     row = ui_positions.patterns.row,
     col = ui_positions.patterns.col,
     style = 'minimal',
-    border = {"┏", "━" ,"┳", "┃", "┻", "━", "┗", "┃"},
-    title = {{'patterns', 'Number'}},
+    border = options.values.borders.patterns,
+    title = {{options.values.titles.patterns, 'Number'}},
     title_pos = 'center',
     zindex = 10,
   })
   wins.replacements = vim.api.nvim_open_win(bufs.replacements, false, {
     relative = 'editor',
-    width = options.values.patterns_width,
+    width = options.values.patterns_width - 1,
     height = options.values.patterns_height,
     row = ui_positions.replacements.row,
-    col = ui_positions.replacements.col,
+    col = ui_positions.replacements.col + 1,
     style = 'minimal',
-    border = {"┳", "━" ,"┳", "┃", "┻", "━", "┻", "┃"},
-    title = {{'replacements', 'Number'}},
+    border = options.values.borders.replacements,
+    title = {{options.values.titles.replacements, 'Number'}},
     title_pos = 'center',
     zindex = 10,
   })
@@ -467,13 +467,13 @@ M.open = function(opts)
   other_win[wins.replacements] = wins.patterns
   wins.options = vim.api.nvim_open_win(bufs.options, false, {
     relative = 'editor',
-    width = options.values.options_width,
+    width = options.values.options_width - 1,
     height = options.values.patterns_height,
     row = ui_positions.options.row,
-    col = ui_positions.options.col,
+    col = ui_positions.options.col + 1,
     style = 'minimal',
-    border = {"┳", "━" ,"┓", "┃", "┛", "━", "┻", "┃"},
-    title = {{'options', 'Comment'}},
+    border = options.values.borders.options,
+    title = {{options.values.titles.options, 'Comment'}},
     title_pos = 'center',
     zindex = 10,
   })
@@ -482,28 +482,71 @@ M.open = function(opts)
     open_preview()
   end
 
+	-- Set transparency
+	vim.api.nvim_win_set_option(wins.preview, "winblend", options.values.winblend.preview)
+
+	vim.api.nvim_win_set_option(wins.patterns, "winblend", options.values.winblend.patterns)
+	vim.api.nvim_win_set_option(wins.replacements, "winblend", options.values.winblend.replacements)
+	vim.api.nvim_win_set_option(wins.options, "winblend", options.values.winblend.options)
+
+	-- Setting keymaps
   local keys = options.values.keys
   for _, buf in ipairs({bufs.patterns, bufs.replacements, bufs.options}) do
-    vim.keymap.set('n', keys.close, M.close, {buffer = buf})
-    vim.keymap.set('n', keys.toggle_options_focus, toggle_options_focus, {buffer = buf})
-    vim.keymap.set('n', keys.do_undo, do_undo, {buffer = buf})
-    vim.keymap.set('n', keys.do_redo, do_redo, {buffer = buf})
-    vim.keymap.set('n', keys.scroll_preview_up, scroll_preview_up, {buffer = buf})
-    vim.keymap.set('n', keys.scroll_preview_down, scroll_preview_down, {buffer = buf})
-    vim.api.nvim_create_autocmd('WinClosed', {
+		local bufKeys = { "close", "toggle_options_focus", "do_undo" };
+		local actions = {
+			close = M.close,
+			toggle_options_focus = toggle_options_focus,
+			do_undo = do_undo,
+			do_redo = do_redo,
+			scroll_preview_up = scroll_preview_up,
+			scroll_preview_down = scroll_preview_down
+		};
+
+		for _, name in ipairs(bufKeys) do
+			local key = keys[name];
+			local act = actions[name];
+
+			if type(key) ~= "table" then
+				vim.keymap.set("n", key, act, { buffer = buf });
+			else
+				for _, one in ipairs(key) do
+					vim.keymap.set("n", one, act, { buffer = buf });
+				end
+			end
+		end
+
+
+		vim.api.nvim_create_autocmd('WinClosed', {
       callback = function() M.close() end,
       buffer = buf,
     })
   end
   for _, buf in ipairs({bufs.patterns, bufs.replacements}) do
-    vim.keymap.set('n', keys.do_replace, do_replace, {buffer = buf})
-    vim.keymap.set('n', keys.toggle_side, toggle_side, {buffer = buf})
+		local otherKeys = { "do_replace", "toggle_side" }
+		local otherActs = {
+			do_replace = do_replace,
+			toggle_side = toggle_side
+		}
+
+		for _, name in ipairs(otherKeys) do
+			local key = keys[name];
+			local act = otherActs[name];
+
+			if type(key) ~= "table" then
+				vim.keymap.set("n", key, act, { buffer = buf });
+			else
+				for _, one in ipairs(key) do
+					vim.keymap.set("n", one, act, { buffer = buf });
+				end
+			end
+		end
+
     vim.api.nvim_create_autocmd({'TextChanged', 'TextChangedI'}, {
       callback = update_preview,
       buffer = buf,
     })
   end
-  vim.keymap.set('n', keys.toggle_option_under_cursor, toggle_option_under_cursor, {buffer = bufs.options})
+  --vim.keymap.set('n', keys.toggle_option_under_cursor, toggle_option_under_cursor, {buffer = bufs.options})
   vim.api.nvim_create_autocmd('CursorMoved', {
     callback = function() align_cursor(wins.patterns) end,
     buffer = bufs.patterns,

@@ -19,14 +19,38 @@ M.default = {
     scroll_preview_up = '<Up>',
     scroll_preview_down = '<Down>',
     do_replace = '<CR>',
-    do_undo = '<localleader>u',
-    do_redo = '<localleader>r',
+    do_undo = '<C-u>',
+    do_redo = '<C-r>',
   },
   -- ui sizes
   patterns_width = 30,
   patterns_height = 10,
   options_width = 20,
   preview_height = 12,
+	-- ui borders
+	borders = {
+		preview = "rounded",
+
+		patterns = "rounded",
+		replacements = "rounded",
+		options = "rounded",
+	},
+	-- Winblend
+	winblend = {
+		preview = 40,
+
+		patterns = 40,
+		replacements = 40,
+		options = 40,
+	},
+	-- Titles
+	titles = {
+		preview = " Preview ",
+
+		patterns = " Patterns ",
+		replacements = " Replacements ",
+		options = " Options ",
+	},
   -- ui position
   anchor = 'center',
   vertical_offset = 0,
