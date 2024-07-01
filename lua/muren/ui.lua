@@ -372,10 +372,24 @@ local align_cursor = function(master_win)
 end
 
 local do_replace = function()
-  local lines = get_ui_lines()
-  last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
-  last_undoed_bufs = nil
-  vim.notify "Replacements done"
+  -- Prompt for confirmation
+  vim.ui.prompt {
+    prompt = "Are you sure you want to perform the replacement? (y/n)",
+    callback = function(input)
+      if input:lower() == "y" then
+        -- Perform the replacement
+        local lines = get_ui_lines()
+        last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
+        last_undoed_bufs = nil
+
+        -- Notify user that the replacement was done
+        vim.notify "Replacement done successfully"
+      else
+        -- Notify user that replacement was canceled
+        vim.notify "Replacement canceled"
+      end
+    end,
+  }
 end
 
 local do_undo = function()
