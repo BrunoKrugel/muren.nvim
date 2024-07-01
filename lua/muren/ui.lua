@@ -410,7 +410,15 @@ local do_replace = function()
         local lines = get_ui_lines()
         last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
         last_undoed_bufs = nil
-        vim.notify "Replacement done successfully"
+
+        -- Count number of replacements
+        local num_replacements = 0
+        for _, buf in pairs(last_edited_bufs) do
+          num_replacements = num_replacements + 1
+        end
+
+        -- Notify user with the number of replacements done
+        vim.notify(string.format("%d replacements", num_replacements))
       end
     end,
   })
