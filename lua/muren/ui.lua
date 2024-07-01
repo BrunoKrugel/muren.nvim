@@ -376,7 +376,7 @@ local do_replace = function()
   local event = require("nui.utils.autocmd").event
 
   local menu = Menu({
-    position = "50%",
+    position = "75%%",
     size = {
       width = 30,
       height = 10,
@@ -410,15 +410,7 @@ local do_replace = function()
         local lines = get_ui_lines()
         last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
         last_undoed_bufs = nil
-
-        -- Count number of replacements
-        local num_replacements = 0
-        for _, buf in pairs(last_edited_bufs) do
-          num_replacements = num_replacements + 1
-        end
-
-        -- Notify user with the number of replacements done
-        vim.notify(string.format("%d replacements", num_replacements))
+        vim.notify("Replacements done")
       end
     end,
   })
@@ -436,6 +428,7 @@ local do_undo = function()
   end
   last_undoed_bufs = last_edited_bufs
   last_edited_bufs = nil
+  vim.notify "Undo done"
 end
 
 local do_redo = function()
@@ -448,6 +441,7 @@ local do_redo = function()
   end
   last_edited_bufs = last_undoed_bufs
   last_undoed_bufs = nil
+  vim.notify "Redo done"
 end
 
 M.open = function(opts)
