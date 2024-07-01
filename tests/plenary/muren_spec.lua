@@ -3,7 +3,7 @@ local function escape_keys(keys)
 end
 
 local function feedkeys(keys)
-  vim.api.nvim_feedkeys(escape_keys(keys), 'xmt', true)
+  vim.api.nvim_feedkeys(escape_keys(keys), "xmt", true)
 end
 
 local function unload(name)
@@ -19,183 +19,183 @@ local function set_current_lines(lines)
 end
 
 local function assert_current_lines(expected_lines)
-  local current = vim.fn.join(vim.api.nvim_buf_get_lines(0, 0, -1, true), '\n')
-  local expected = vim.fn.join(expected_lines, '\n')
+  local current = vim.fn.join(vim.api.nvim_buf_get_lines(0, 0, -1, true), "\n")
+  local expected = vim.fn.join(expected_lines, "\n")
   assert.are.equal(current, expected)
 end
 
 describe("muren", function()
   after_each(function()
     vim.cmd.MurenClose()
-    require('muren.ui').reset()
-    unload('muren')
-    set_current_lines({})
+    require("muren.ui").reset()
+    unload "muren"
+    set_current_lines {}
   end)
   it("basic_usage", function()
     local orig_buf = vim.api.nvim_get_current_buf()
-    set_current_lines({'foo'})
+    set_current_lines { "foo" }
     vim.cmd.MurenToggle()
-    set_current_lines({'foo'})
-    feedkeys('<Tab>')
-    set_current_lines({'bar'})
+    set_current_lines { "foo" }
+    feedkeys "<Tab>"
+    set_current_lines { "bar" }
     local buf = vim.api.nvim_get_current_buf()
-    feedkeys('<CR>')
+    feedkeys "<CR>"
     assert.are.equal(buf, vim.api.nvim_get_current_buf())
-    feedkeys('q')
+    feedkeys "q"
     assert.are.equal(orig_buf, vim.api.nvim_get_current_buf())
-    assert_current_lines({'bar'})
+    assert_current_lines { "bar" }
   end)
   it("persistent_toggle", function()
-    set_current_lines({'foo'})
+    set_current_lines { "foo" }
     vim.cmd.MurenToggle()
-    set_current_lines({'foo'})
-    feedkeys('<Tab>')
-    set_current_lines({'bar'})
-    feedkeys('q')
+    set_current_lines { "foo" }
+    feedkeys "<Tab>"
+    set_current_lines { "bar" }
+    feedkeys "q"
     vim.cmd.MurenToggle()
-    assert_current_lines({'foo'})
-    feedkeys('<Tab>')
-    assert_current_lines({'bar'})
-    feedkeys('q')
+    assert_current_lines { "foo" }
+    feedkeys "<Tab>"
+    assert_current_lines { "bar" }
+    feedkeys "q"
     vim.cmd.MurenFresh()
-    assert_current_lines({})
-    feedkeys('<Tab>')
-    assert_current_lines({})
+    assert_current_lines {}
+    feedkeys "<Tab>"
+    assert_current_lines {}
   end)
   it("swap", function()
-    set_current_lines({'foo', 'bar'})
+    set_current_lines { "foo", "bar" }
     vim.cmd.MurenToggle()
-    assert.are.equal(require('muren.options').values.two_step, false)
-    feedkeys('<C-s>')
-    feedkeys('jjj')
-    feedkeys('<CR>')
-    feedkeys('<C-s>')
-    assert.are.equal(require('muren.options').values.two_step, true)
-    set_current_lines({'foo', 'bar'})
-    feedkeys('<Tab>')
-    set_current_lines({'bar', 'foo'})
-    feedkeys('<CR>')
-    feedkeys('q')
-    assert_current_lines({'bar', 'foo'})
+    assert.are.equal(require("muren.options").values.two_step, false)
+    feedkeys "<C-s>"
+    feedkeys "jjj"
+    feedkeys "<CR>"
+    feedkeys "<C-s>"
+    assert.are.equal(require("muren.options").values.two_step, true)
+    set_current_lines { "foo", "bar" }
+    feedkeys "<Tab>"
+    set_current_lines { "bar", "foo" }
+    feedkeys "<CR>"
+    feedkeys "q"
+    assert_current_lines { "bar", "foo" }
   end)
   it("unique", function()
-    vim.cmd.edit("tmp.txt")
-    set_current_lines({'fo', 'foo', 'foo', 'fooo'})
+    vim.cmd.edit "tmp.txt"
+    set_current_lines { "fo", "foo", "foo", "fooo" }
     vim.cmd.write()
-    vim.cmd('/fo\\+')
+    vim.cmd "/fo\\+"
     vim.cmd.MurenUnique()
-    assert_current_lines({'fo', 'foo', 'fooo'})
-    vim.cmd.bdelete({bang = true})
+    assert_current_lines { "fo", "foo", "fooo" }
+    vim.cmd.bdelete { bang = true }
   end)
   -- toggle options
   it("2-step", function()
-    set_current_lines({'foo', 'bar'})
+    set_current_lines { "foo", "bar" }
     vim.cmd.MurenToggle()
-    set_current_lines({'foo', 'bar'})
-    feedkeys('<Tab>')
-    set_current_lines({'bar', 'foo'})
-    feedkeys('<CR>')
-    feedkeys('q')
-    assert_current_lines({'foo', 'foo'})
+    set_current_lines { "foo", "bar" }
+    feedkeys "<Tab>"
+    set_current_lines { "bar", "foo" }
+    feedkeys "<CR>"
+    feedkeys "q"
+    assert_current_lines { "foo", "foo" }
   end)
   it("all_on_line true", function()
-    set_current_lines({'foo foo'})
+    set_current_lines { "foo foo" }
     vim.cmd.MurenToggle()
-    set_current_lines({'foo'})
-    feedkeys('<Tab>')
-    set_current_lines({'bar'})
-    feedkeys('<CR>')
-    feedkeys('q')
-    assert_current_lines({'bar bar'})
+    set_current_lines { "foo" }
+    feedkeys "<Tab>"
+    set_current_lines { "bar" }
+    feedkeys "<CR>"
+    feedkeys "q"
+    assert_current_lines { "bar bar" }
   end)
   it("all_on_line false", function()
-    set_current_lines({'foo foo'})
+    set_current_lines { "foo foo" }
     vim.cmd.MurenToggle()
-    set_current_lines({'foo'})
-    feedkeys('<Tab>')
-    set_current_lines({'bar'})
-    feedkeys('<C-s>')
-    feedkeys('jjjj')
-    feedkeys('<CR>')
-    feedkeys('<C-s>')
-    feedkeys('<CR>')
-    feedkeys('q')
-    assert_current_lines({'bar foo'})
+    set_current_lines { "foo" }
+    feedkeys "<Tab>"
+    set_current_lines { "bar" }
+    feedkeys "<C-s>"
+    feedkeys "jjjj"
+    feedkeys "<CR>"
+    feedkeys "<C-s>"
+    feedkeys "<CR>"
+    feedkeys "q"
+    assert_current_lines { "bar foo" }
   end)
   it("range", function()
-    set_current_lines({'foo', 'foo'})
-    feedkeys('V:MurenToggle<CR>')
-    set_current_lines({'foo'})
-    feedkeys('<Tab>')
-    set_current_lines({'bar'})
-    feedkeys('<CR>')
-    feedkeys('q')
-    assert_current_lines({'bar', 'foo'})
+    set_current_lines { "foo", "foo" }
+    feedkeys "V:MurenToggle<CR>"
+    set_current_lines { "foo" }
+    feedkeys "<Tab>"
+    set_current_lines { "bar" }
+    feedkeys "<CR>"
+    feedkeys "q"
+    assert_current_lines { "bar", "foo" }
   end)
 end)
 
 describe("muren cwd", function()
   before_each(function()
-    vim.cmd.edit("a.txt")
-    vim.api.nvim_buf_set_lines(0, 0, -1, true, {'ffo'})
+    vim.cmd.edit "a.txt"
+    vim.api.nvim_buf_set_lines(0, 0, -1, true, { "ffo" })
     vim.cmd.write()
-    vim.cmd.edit("b.txt")
-    vim.api.nvim_buf_set_lines(0, 0, -1, true, {'ffoo'})
+    vim.cmd.edit "b.txt"
+    vim.api.nvim_buf_set_lines(0, 0, -1, true, { "ffoo" })
     vim.cmd.write()
-    vim.cmd.edit("c.txt")
-    vim.api.nvim_buf_set_lines(0, 0, -1, true, {'ffooo'})
+    vim.cmd.edit "c.txt"
+    vim.api.nvim_buf_set_lines(0, 0, -1, true, { "ffooo" })
     vim.cmd.write()
-    vim.cmd.edit("d.txt")
-    vim.api.nvim_buf_set_lines(0, 0, -1, true, {'bbar'})
+    vim.cmd.edit "d.txt"
+    vim.api.nvim_buf_set_lines(0, 0, -1, true, { "bbar" })
     vim.cmd.write()
   end)
   after_each(function()
     vim.cmd.MurenClose()
-    require('muren.ui').reset()
-    unload('muren')
-    set_current_lines({})
+    require("muren.ui").reset()
+    unload "muren"
+    set_current_lines {}
   end)
   it("basic", function()
-    feedkeys('V:MurenToggle<CR>')
-    set_current_lines({'ffoo\\+'})
-    feedkeys('<Tab>')
-    set_current_lines({'bbar'})
-    feedkeys('<C-s>')
-    feedkeys('j')
-    feedkeys('<CR>')
-    feedkeys('<C-s>')
-    feedkeys('<CR>')
-    feedkeys('q')
-    vim.cmd.edit("a.txt")
-    assert_current_lines({'ffo'})
-    vim.cmd.edit("b.txt")
-    assert_current_lines({'bbar'})
-    vim.cmd.edit("c.txt")
-    assert_current_lines({'bbar'})
-    vim.cmd.edit("d.txt")
-    assert_current_lines({'bbar'})
+    feedkeys "V:MurenToggle<CR>"
+    set_current_lines { "ffoo\\+" }
+    feedkeys "<Tab>"
+    set_current_lines { "bbar" }
+    feedkeys "<C-s>"
+    feedkeys "j"
+    feedkeys "<CR>"
+    feedkeys "<C-s>"
+    feedkeys "<CR>"
+    feedkeys "q"
+    vim.cmd.edit "a.txt"
+    assert_current_lines { "ffo" }
+    vim.cmd.edit "b.txt"
+    assert_current_lines { "bbar" }
+    vim.cmd.edit "c.txt"
+    assert_current_lines { "bbar" }
+    vim.cmd.edit "d.txt"
+    assert_current_lines { "bbar" }
   end)
   it("swap", function()
-    feedkeys('V:MurenToggle<CR>')
-    set_current_lines({'ffoo\\+', 'bbar'})
-    feedkeys('<Tab>')
-    set_current_lines({'bbar', 'ffoo'})
-    feedkeys('<C-s>')
-    feedkeys('j')
-    feedkeys('<CR>')
-    feedkeys('jj')
-    feedkeys('<CR>')
-    feedkeys('<C-s>')
-    feedkeys('<CR>')
-    feedkeys('q')
-    vim.cmd.edit("a.txt")
-    assert_current_lines({'ffo'})
-    vim.cmd.edit("b.txt")
-    assert_current_lines({'bbar'})
-    vim.cmd.edit("c.txt")
-    assert_current_lines({'bbar'})
-    vim.cmd.edit("d.txt")
-    assert_current_lines({'ffoo'})
+    feedkeys "V:MurenToggle<CR>"
+    set_current_lines { "ffoo\\+", "bbar" }
+    feedkeys "<Tab>"
+    set_current_lines { "bbar", "ffoo" }
+    feedkeys "<C-s>"
+    feedkeys "j"
+    feedkeys "<CR>"
+    feedkeys "jj"
+    feedkeys "<CR>"
+    feedkeys "<C-s>"
+    feedkeys "<CR>"
+    feedkeys "q"
+    vim.cmd.edit "a.txt"
+    assert_current_lines { "ffo" }
+    vim.cmd.edit "b.txt"
+    assert_current_lines { "bbar" }
+    vim.cmd.edit "c.txt"
+    assert_current_lines { "bbar" }
+    vim.cmd.edit "d.txt"
+    assert_current_lines { "ffoo" }
   end)
   -- FIXME comment this out for now since it passes locally but not remotely for some reason
   -- it("file pattern", function()
@@ -218,35 +218,35 @@ describe("muren cwd", function()
   --   assert_current_lines({'bbar'})
   -- end)
   it("undo redo", function()
-    feedkeys('V:MurenToggle<CR>')
-    set_current_lines({'ffoo\\+'})
-    feedkeys('<Tab>')
-    set_current_lines({'bbar'})
-    feedkeys('<C-s>')
-    feedkeys('j')
-    feedkeys('<CR>')
-    feedkeys('<C-s>')
-    feedkeys('<CR>')
-    feedkeys('<localleader>u')
-    feedkeys('q')
-    vim.cmd.edit("a.txt")
-    assert_current_lines({'ffo'})
-    vim.cmd.edit("b.txt")
-    assert_current_lines({'ffoo'})
-    vim.cmd.edit("c.txt")
-    assert_current_lines({'ffooo'})
-    vim.cmd.edit("d.txt")
-    assert_current_lines({'bbar'})
-    feedkeys('V:MurenToggle<CR>')
-    feedkeys('<localleader>r')
-    feedkeys('q')
-    vim.cmd.edit("a.txt")
-    assert_current_lines({'ffo'})
-    vim.cmd.edit("b.txt")
-    assert_current_lines({'bbar'})
-    vim.cmd.edit("c.txt")
-    assert_current_lines({'bbar'})
-    vim.cmd.edit("d.txt")
-    assert_current_lines({'bbar'})
+    feedkeys "V:MurenToggle<CR>"
+    set_current_lines { "ffoo\\+" }
+    feedkeys "<Tab>"
+    set_current_lines { "bbar" }
+    feedkeys "<C-s>"
+    feedkeys "j"
+    feedkeys "<CR>"
+    feedkeys "<C-s>"
+    feedkeys "<CR>"
+    feedkeys "<localleader>u"
+    feedkeys "q"
+    vim.cmd.edit "a.txt"
+    assert_current_lines { "ffo" }
+    vim.cmd.edit "b.txt"
+    assert_current_lines { "ffoo" }
+    vim.cmd.edit "c.txt"
+    assert_current_lines { "ffooo" }
+    vim.cmd.edit "d.txt"
+    assert_current_lines { "bbar" }
+    feedkeys "V:MurenToggle<CR>"
+    feedkeys "<localleader>r"
+    feedkeys "q"
+    vim.cmd.edit "a.txt"
+    assert_current_lines { "ffo" }
+    vim.cmd.edit "b.txt"
+    assert_current_lines { "bbar" }
+    vim.cmd.edit "c.txt"
+    assert_current_lines { "bbar" }
+    vim.cmd.edit "d.txt"
+    assert_current_lines { "bbar" }
   end)
 end)
