@@ -6,9 +6,6 @@ local utils = require "muren.utils"
 local options = require "muren.options"
 local search = require "muren.search"
 
-local Menu = require "nui.menu"
-local event = require("nui.utils.autocmd").event
-
 local last_lines = {}
 local last_edited_bufs
 local last_undoed_bufs
@@ -381,8 +378,8 @@ local do_replace = function()
   local menu = Menu({
     position = "50%",
     size = {
-      width = 25,
-      height = 5,
+      width = 30,
+      height = 10,
     },
     border = {
       style = "rounded",
@@ -406,9 +403,7 @@ local do_replace = function()
       close = { "<Esc>", "<C-c>" },
       submit = { "<CR>", "<Space>" },
     },
-    on_close = function()
-      print "Menu Closed!"
-    end,
+    on_close = function() end,
     on_submit = function(item)
       print("Menu Submitted: ", item.text)
       if item.text == "Yes (y)" then
@@ -416,8 +411,6 @@ local do_replace = function()
         last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
         last_undoed_bufs = nil
         vim.notify "Replacement done successfully"
-      else
-        print "No"
       end
     end,
   })
