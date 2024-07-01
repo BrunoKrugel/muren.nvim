@@ -410,7 +410,9 @@ local do_replace = function()
         local lines = get_ui_lines()
         last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
         last_undoed_bufs = nil
-        vim.notify("Replacements done")
+        if options.values.notify then
+          vim.notify "Replacements done"
+        end
       end
     end,
   })
@@ -420,7 +422,9 @@ end
 
 local do_undo = function()
   if not last_edited_bufs then
-    vim.notify "nothing to undo"
+    if options.values.notify then
+      vim.notify "Nothing to undo."
+    end
     return
   end
   for buf in pairs(last_edited_bufs) do
@@ -428,12 +432,16 @@ local do_undo = function()
   end
   last_undoed_bufs = last_edited_bufs
   last_edited_bufs = nil
-  vim.notify "Undo done"
+  if options.values.notify then
+    vim.notify "Undo done"
+  end
 end
 
 local do_redo = function()
   if not last_undoed_bufs then
-    vim.notify "nothing to redo"
+    if options.values.notify then
+      vim.notify "Nothing to redo."
+    end
     return
   end
   for buf in pairs(last_undoed_bufs) do
@@ -441,7 +449,9 @@ local do_redo = function()
   end
   last_edited_bufs = last_undoed_bufs
   last_undoed_bufs = nil
-  vim.notify "Redo done"
+  if options.values.notify then
+    vim.notify "Redo done"
+  end
 end
 
 M.open = function(opts)

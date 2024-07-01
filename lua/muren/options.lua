@@ -4,6 +4,7 @@ M.default = {
   -- general
   create_commands = true,
   filetype_in_preview = true,
+  notify = true,
   -- default togglable options
   two_step = false,
   all_on_line = true,
