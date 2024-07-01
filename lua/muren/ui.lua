@@ -376,7 +376,7 @@ local do_replace = function()
   local event = require("nui.utils.autocmd").event
 
   local menu = Menu({
-    position = "75%%",
+    position = "75%",
     size = {
       width = 30,
       height = 10,
