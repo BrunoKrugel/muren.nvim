@@ -429,11 +429,7 @@ local do_replace = function()
   local menu = Menu(popup_options, {
     lines = {
       Menu.item("* Yes", { action = "replace" }),
-      Menu.item("* No", { action = "next" }),
-      Menu.separator "",
-      Menu.item("* All", { action = "replace_all" }),
-      Menu.item("* Quit", { action = "quit" }),
-      Menu.item("* Last replace", { action = "last" }),
+      Menu.item("* No", { action = "quit" }),
     },
     max_width = 20,
     separator = {
