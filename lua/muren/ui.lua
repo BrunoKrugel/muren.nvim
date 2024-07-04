@@ -405,7 +405,6 @@ local do_replace = function()
     },
     on_close = function() end,
     on_submit = function(item)
-      print("Menu Submitted: ", item.text)
       if item.text == "Yes (y)" then
         local lines = get_ui_lines()
         last_edited_bufs = search.do_replace_with_patterns(lines.patterns, lines.replacements, options.values)
